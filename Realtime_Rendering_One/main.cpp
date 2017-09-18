@@ -1,25 +1,18 @@
-
-//Some Windows Headers (For Time, IO, etc.)
-#include <windows.h>
+#include <time.h>
 #include "GLM.h"
 #include <common/SingleMeshLoader.h>
 #include <common/EulerCamera.h>
 #include <common/Utilities.h>
 #include <common/Shader.h>
 #include <common/text.h>
+#include <common/Defines.h>
 
 using namespace std;
-GLuint noTextureShaderID, bearShaderID, blackBearShaderID, variableShaderID, coneShaderID;
-Shader shaderFactory;
 
 const int width = 800, height = 800;
 /*----------------------------------------------------------------------------
 						MESH AND TEXTURE VARIABLES
 ----------------------------------------------------------------------------*/
-#define MONKEYHEAD_MESH "../Meshes/monkeyhead.obj"
-#define WALL_MESH "../Meshes/wall.obj"
-#define BEAR_MESH "../Meshes/bear.obj"
-#define BEAR_TEXTURE "../Textures/bear.tga"
 
 SingleMesh monkeyhead_mesh;
 SingleMesh bear_mesh;
@@ -34,12 +27,8 @@ int textIDs[5] = { -1 };
 								SHADER VARIABLES
 ----------------------------------------------------------------------------*/
 
-#define NOTEXTURE_VERT "../Shaders/noTextureVertexShader.txt"
-#define NOTEXTURE_FRAG "../Shaders/noTextureFragmentShader.txt"
-#define BEAR_FRAG "../Shaders/bearFragmentShader.txt"
-#define BLACKBEAR_FRAG "../Shaders/blackBearFragmentShader.txt"
-#define VARIABLE_FRAG "../Shaders/variableFragmentShader.txt"
-#define CONE_FRAG "../Shaders/coneLightFragmentShader.txt"
+GLuint noTextureShaderID, bearShaderID, blackBearShaderID, variableShaderID, coneShaderID;
+Shader shaderFactory;
 
 /*----------------------------------------------------------------------------
 							CAMERA VARIABLES
@@ -118,21 +107,20 @@ void display() {
 }
 
 void updateScene() {
-	static DWORD  last_frame;	//time when last frame was drawn
-	static DWORD last_timer = 0;	//time when timer was updated
-	DWORD  curr_time = timeGetTime();//for frame Rate Stuff.
+	static clock_t lastFrame = clock();
+	clock_t currFrame = clock();
+	float delta = (currFrame - lastFrame) / (float)CLOCKS_PER_SEC;
 
-	float  delta = (curr_time - last_frame) * 0.001f;
 	if (delta >= 0.03f) 
 	{
-		last_frame = curr_time;
-		glutPostRedisplay();
+		lastFrame = currFrame;
 		rotateY = rotateY + 0.5f;
 		rotateLight = rotateLight + 0.1f;
 		if (rotateY >= 360.0f)
 			rotateY = 0.0f;
 		if (rotateLight >= 360.0f)
 			rotateLight = 0.0f;
+		glutPostRedisplay();
 	}
 	
 }
@@ -206,7 +194,7 @@ int main(int argc, char** argv) {
 		"Black Matte Color",
 		0.3f, 0.4f, fontSize, 1.0f, 1.0f, 1.0f, 1.0f);
 	textIDs[2] = add_text(
-		"Blinn Phong Shading",
+		"Blinn-Phong Shading",
 		-0.3f, -0.2f, fontSize, 1.0f, 1.0f, 1.0f, 1.0f);
 	textIDs[3] = add_text(
 		"Color based on gl_FragCoord",

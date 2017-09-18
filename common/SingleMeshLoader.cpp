@@ -86,7 +86,7 @@ void SingleMesh::loadCubeFace(GLuint textureID, GLenum side, const char* filenam
 	std::string name = filename;
 	if (image == NULL)
 	{
-		fprintf(stderr ,"Failed to load image");
+		fprintf(stderr ,"Failed to load image\n");
 		return;
 	}
 	//else
