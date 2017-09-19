@@ -71,13 +71,6 @@ GLfloat vertices[] = {
 								SHADER VARIABLES
 ----------------------------------------------------------------------------*/
 
-
-#define SKY_VERT "../Shaders/skyboxVertexShader.txt"
-#define SKY_FRAG "../Shaders/skyboxFragmentShader.txt"
-
-#define REFLECTIVE_FRAG "../Shaders/reflectiveFragmentShader.txt"
-#define FRESNEL_FRAG	"../Shaders/fresnelFragmentShader.txt"
-
 GLuint noTextureShaderID, textureShaderID, cubeMapTextureID, refractiveShaderID, cubeMapShaderID, testID, normalisedShaderID, reflectiveShaderID;
 Shader shaderFactory;
 
@@ -125,9 +118,9 @@ void init()
 	monkeyhead_mesh.init(MONKEYHEAD_MESH, NULL, NULL);
 	cube.initCubeMap(vertices, 36, CUBE_TEXTURE);
 	torch_mesh.init(TORCH_MESH, NULL, NULL);
-
+	torch_mesh.mode = GL_QUADS;
 	bear_mesh.init(BEAR_MESH, BEAR_TEXTURE, NULL);
-	wall_mesh.init(WALL_MESH, BRICK_NORMAL, NULL);
+	wall_mesh.init(WALL_MESH, BRICK_TEXTURE, WOOD_NORMAL);
 	sign_meshReflect.init(SIGN_MESH, REFLECT_TEXTURE, NULL);
 	sign_meshRefract.init(SIGN_MESH, REFRACT_TEXTURE, NULL);
 	sign_meshNormal.init(SIGN_MESH, NORMAL_TEXTURE, NULL);
@@ -135,77 +128,76 @@ void init()
 
 void display() {
 
-	glEnable(GL_DEPTH_TEST);								// enable depth-testing
-	glDepthFunc(GL_LESS);									// depth-testing interprets a smaller value as "closer"
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		// Clear the color and buffer bits to make a clean slate
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);					//Create a black background
+	glEnable(GL_DEPTH_TEST);				
+	glDepthFunc(GL_LESS);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 
 	glm::mat4 view, model, proj;
 
-	LightStruct light;
+	LightStruct lightContainer;
+	lightContainer.lightLocation = glm::vec3(15.8*cos(rotateLight), 15.0f, 1.8*sin(rotateLight) + 1.0f);
+	lightContainer.Ld = glm::vec3(0.8f, 0.8f, 0.8f);
 
-	light.Kd = WHITE;
+	lightContainer.Kd = WHITE;
 	model = glm::mat4();
 	drawCubeMap(cubeMapShaderID, cam, cube);
-	model = glm::scale(glm::mat4(), glm::vec3(0.01f, 0.01f, 0.01f));
-	model = glm::translate(model, light.light);
-	drawObject(noTextureShaderID, cam, cube, model, false, light);
 
-	light.Kd = BROWN;
-	model = glm::scale(glm::mat4(), glm::vec3(2.0, 2.0, 2.0));
+	model = glm::translate(glm::mat4(), lightContainer.lightLocation);
+	model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
+	drawObject(noTextureShaderID, cam, cube, model, false, lightContainer);
+
+	model = glm::translate(glm::mat4(), glm::vec3(5.0, -5.5, 0.0));
+	model = glm::scale(model, glm::vec3(2.0, 2.0, 2.0));
 	model = glm::rotate(model, 180.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-	model = glm::translate(model, glm::vec3(5.0, -6.0, 0.0));
-	drawObject(textureShaderID, cam, bear_mesh, model, false, light);
 
-	light.Kd = WHITE;
+	drawObject(textureShaderID, cam, bear_mesh, model, false, lightContainer);
+
+	lightContainer.Kd = WHITE;
 	model = glm::rotate(glm::mat4(), rotateY, glm::vec3(0.0, 1.0, 0.0));
-	drawObject(refractiveShaderID, cam, monkeyhead_mesh, model, false, light);
+	drawObject(refractiveShaderID, cam, monkeyhead_mesh, model, false, lightContainer);
 
-	model = glm::rotate(glm::mat4(), 180.0f, glm::vec3(0.0, 0.0, 1.0));
-	model = glm::translate(model, glm::vec3(0.0, -3.0f, -2.5f));
-	drawObject(textureShaderID, cam, sign_meshRefract, model, false, light);
+	model = glm::translate(glm::mat4(), glm::vec3(0.0, -3.0f, -2.5f));
+	model = glm::rotate(model, 180.0f, glm::vec3(0.0, 0.0, 1.0));
+	drawObject(textureShaderID, cam, sign_meshRefract, model, false, lightContainer);
 
-	light.Kd = BROWN;
-	model = glm::translate(glm::mat4(), glm::vec3(0.0f, -6.3f, 0.0f));
-	drawObject(noTextureShaderID, cam, torch_mesh, model, false, light);
+	lightContainer.Kd = BROWN;
+	model = glm::translate(glm::mat4(), glm::vec3(0.0f, -6.0f, 0.0f));
+	drawObject(noTextureShaderID, cam, torch_mesh, model, false, lightContainer);
 
-	light.Kd = GREY;
-	model = glm::rotate(glm::mat4(), 90.0f, glm::vec3(0.0, 0.0, 1.0));
-	model = glm::translate(model, glm::vec3(7.4f, -6.5f, 0.0f));
-	light.light = -light.light;
-	light.specular_exponent = 50.0f;
-	drawObject(normalisedShaderID, cam, wall_mesh, model, false, light);
-
-	light.Kd = WHITE;
-	light.light = -light.light;
-	light.specular_exponent = 0.5;
+	lightContainer.Kd = WHITE;
 
 	glm::mat4 rootmodel = glm::translate(glm::mat4(), glm::vec3(-16.0, 0.0, 0.0));
 
 	model = glm::scale(glm::mat4(), glm::vec3(0.03f, 0.03f, 0.03f));
 	model = glm::translate(model, glm::vec3(0.0f, 0.1f, 0.0f));
 	model = rootmodel * model;
-	drawObject(reflectiveShaderID, cam, cube, model, false, light);
+	drawObject(reflectiveShaderID, cam, cube, model, false, lightContainer);
 
-	model = glm::rotate(glm::mat4(), 180.0f, glm::vec3(0.0, 0.0, 1.0));
-	model = glm::translate(model, glm::vec3(0.0, -3.0f, -2.5f));
+	model = glm::translate(glm::mat4(), glm::vec3(0.0, -3.0f, -2.5f));
+	model = glm::rotate(model, 180.0f, glm::vec3(0.0, 0.0, 1.0));
 	model = rootmodel*model;
-	drawObject(textureShaderID, cam, sign_meshReflect, model, false, light);
+	drawObject(textureShaderID, cam, sign_meshReflect, model, false, lightContainer);
 
-	model = glm::translate(glm::mat4(), glm::vec3(0.0f, -6.3f, 0.0f));
+	lightContainer.Kd = BROWN;
+	model = glm::translate(glm::mat4(), glm::vec3(0.0f, -6.0f, 0.0f));
 	model = rootmodel*model;
-	drawObject(noTextureShaderID, cam, torch_mesh, model, false, light);
+	drawObject(noTextureShaderID, cam, torch_mesh, model, false, lightContainer);
 
-	light.Kd = GREY;
-	model = glm::rotate(glm::mat4(), 90.0f, glm::vec3(0.0, 0.0, 1.0));
-	model = glm::translate(model, glm::vec3(7.4f, -6.5f, 0.0f));
+	lightContainer.Kd = GREY;
+	model = glm::translate(glm::mat4(), glm::vec3(7.4f, -6.0f, 0.0f));
+	model = glm::rotate(model, 90.0f, glm::vec3(0.0, 0.0, 1.0));
 	model = rootmodel*model;
-	light.light = -light.light;
-	light.specular_exponent = 50.0f;
-	drawObject(normalisedShaderID, cam, wall_mesh, model, false, light);
+	lightContainer.specular_exponent = 50.0f;
+	lightContainer.Ks = glm::vec3(1.0, 1.0, 1.0);
+	drawObject(normalisedShaderID, cam, wall_mesh, model, false, lightContainer);
 
-	//draw_texts();
+	lightContainer.Kd = GREY;
+	model = glm::translate(glm::mat4(), glm::vec3(7.4f, -6.0f, 0.0f));
+	model = glm::rotate(model, 90.0f, glm::vec3(0.0, 0.0, 1.0));
+	drawObject(normalisedShaderID, cam, wall_mesh, model, false, lightContainer);
+
 	glutSwapBuffers();
 }
 
@@ -217,7 +209,7 @@ void updateScene() {
 	{
 		lastFrame = currFrame;
 		rotateY = rotateY + 0.5f;
-		rotateLight = rotateLight + 0.1f;
+		rotateLight = rotateLight + 0.01f;
 		if (rotateY >= 360.0f)
 			rotateY = 0.0f;
 		if (rotateLight >= 360.0f)

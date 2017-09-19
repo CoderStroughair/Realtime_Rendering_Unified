@@ -16,33 +16,57 @@
     <Filter Include="common">
       <UniqueIdentifier>{a6c37467-e1c3-484a-a925-43b31de3ad2a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="common\Header Files">
+      <UniqueIdentifier>{a4d90d75-8c3c-44b6-a1c6-2d1c247ef46f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common\Source Files">
+      <UniqueIdentifier>{f45d6e74-fcea-45dc-a230-859ec06e922b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\text.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\SingleMeshLoader.cpp">
+      <Filter>common\Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\common\EulerCamera.cpp">
-      <Filter>common</Filter>
+      <Filter>common\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\common\EulerCamera.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\Framebuffer.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\Shader.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\Texture.h">
-      <Filter>common</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\Utilities.h">
-      <Filter>common</Filter>
+    <ClInclude Include="..\common\Antons_maths_funcs.h">
+      <Filter>common\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\Defines.h">
-      <Filter>common</Filter>
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\EulerCamera.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Framebuffer.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Shader.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\SingleMeshLoader.h">
+      <Filter>common\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\stb_image.h">
-      <Filter>common</Filter>
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\teapot.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\text.h">
+      <Filter>common\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\Utilities.h">
+      <Filter>common\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

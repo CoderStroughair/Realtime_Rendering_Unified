@@ -17,9 +17,9 @@ struct LightStruct {
 	// light properties
 	glm::vec3 Ls = glm::vec3(1.0f, 1.0f, 1.0f);	//Specular Reflected Light
 	glm::vec3 Ld = glm::vec3(0.5f, 0.5f, 0.5f);	//Diffuse Surface Reflectance
-	glm::vec3 La = glm::vec3(1.0f, 1.0f, 1.0f);	//Ambient Reflected Light
-	glm::vec3 light = glm::vec3(0, 10, -5.0f);//light source location
-	glm::vec3 coneDirection = light + glm::vec3(0.0f, -1.0f, 0.0f);
+	glm::vec3 La = glm::vec3(0.1f, 0.1f, 0.1f);	//Ambient Reflected Light
+	glm::vec3 lightLocation = glm::vec3(0, 10, -5.0f);//light source location
+	glm::vec3 coneDirection = lightLocation + glm::vec3(0.0f, -1.0f, 0.0f);
 	float coneAngle = 40.0f;
 	// object colour
 	glm::vec3 Ks = glm::vec3(0.001f, 0.001f, 0.001f); // specular reflectance
@@ -33,11 +33,11 @@ struct LightStruct {
 								DEFINITIONS
 ----------------------------------------------------------------------------*/
 GLuint createQuad(int location);
-void drawObject(GLuint shaderID, EulerCamera cam, SingleMesh mesh, glm::mat4 model, bool cone, glm::vec3 light);
-void drawObject(GLuint shaderID, EulerCamera cam, SingleMesh mesh, glm::mat4 model, bool cone, LightStruct light);
 
-void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh mesh);
-void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh mesh, LightStruct light);
+void drawObject(GLuint shaderID, EulerCamera cam, SingleMesh &mesh, glm::mat4 model, bool cone, LightStruct lightLocation);
+
+void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh &mesh);
+void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh &mesh, LightStruct lightLocation);
 /*----------------------------------------------------------------------------
 								IMPLEMENTATIONS
 ----------------------------------------------------------------------------*/
@@ -149,25 +149,27 @@ GLuint createQuad(int location) {
 	return vao;
 }
 
-void drawObject(GLuint shaderID, EulerCamera cam, SingleMesh mesh, glm::mat4 model, bool cone, glm::vec3 light)
+void drawObject(GLuint shaderID, EulerCamera cam, SingleMesh &mesh, glm::mat4 model, bool cone, LightStruct lightLocation)
 {
-	glm::vec3 Ls = glm::vec3(1.0f, 1.0f, 1.0f);	//Specular Reflected Light
-	glm::vec3 Ld = glm::vec3(0.8f, 0.8f, 0.8f);	//Diffuse Surface Reflectance
-	glm::vec3 La = glm::vec3(0.1f, 0.1f, 0.1f);	//Ambient Reflected Light
-
-
 	glUseProgram(shaderID);
 	glBindVertexArray(mesh.VAO[0]);
 	//Light Setup
-	glUniform3fv(glGetUniformLocation(shaderID, "Ls"), 1, &Ls[0]);
-	glUniform3fv(glGetUniformLocation(shaderID, "Ld"), 1, &Ld[0]);
-	glUniform3fv(glGetUniformLocation(shaderID, "La"), 1, &La[0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "Ls"), 1, &lightLocation.Ls[0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "Ld"), 1, &lightLocation.Ld[0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "La"), 1, &lightLocation.La[0]);
+
+	glUniform3fv(glGetUniformLocation(shaderID, "Ks"), 1, &lightLocation.Ks[0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "Kd"), 1, &lightLocation.Kd[0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "Ka"), 1, &lightLocation.Ka[0]);
+
+	glUniform3fv(glGetUniformLocation(shaderID, "light"), 1, &lightLocation.lightLocation[0]);
+	glUniform1f(glGetUniformLocation(shaderID, "specular_exponent"), lightLocation.specular_exponent);
+
 	if (cone)
 	{
-		glm::vec3 coneDirection = light + glm::vec3(0.0f, -1.0f, 0.0f);
-		float coneAngle = 40.0f;
-		glUniform3fv(glGetUniformLocation(shaderID, "coneDirection"), 1, &coneDirection[0]);
-		glUniform1f(glGetUniformLocation(shaderID, "coneAngle"), coneAngle);
+		lightLocation.coneDirection = lightLocation.lightLocation + glm::vec3(0.0f, -1.0f, 0.0f);
+		glUniform3fv(glGetUniformLocation(shaderID, "coneDirection"), 1, &lightLocation.coneDirection[0]);
+		glUniform1f(glGetUniformLocation(shaderID, "coneAngle"), lightLocation.coneAngle);
 	}
 	//Matrix Setup
 	glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_FALSE, &cam.getView()[0][0]);
@@ -188,45 +190,10 @@ void drawObject(GLuint shaderID, EulerCamera cam, SingleMesh mesh, glm::mat4 mod
 		glBindTexture(GL_TEXTURE_2D, mesh.norm);
 		glUniform1i(glGetUniformLocation(shaderID, "normal_map"), 1);
 	}
-	glDrawArrays(GL_TRIANGLES, 0, mesh.mesh_vertex_count);
+	glDrawArrays(mesh.mode, 0, mesh.mesh_vertex_count);
 }
 
-void drawObject(GLuint shaderID, EulerCamera cam, SingleMesh mesh, glm::mat4 model, bool cone, LightStruct light)
-{
-	glUseProgram(shaderID);
-	glBindVertexArray(mesh.VAO[0]);
-	//Light Setup
-	glUniform3fv(glGetUniformLocation(shaderID, "Ls"), 1, &light.Ls[0]);
-	glUniform3fv(glGetUniformLocation(shaderID, "Ld"), 1, &light.Ld[0]);
-	glUniform3fv(glGetUniformLocation(shaderID, "La"), 1, &light.La[0]);
-	if (cone)
-	{
-		glUniform3fv(glGetUniformLocation(shaderID, "coneDirection"), 1, &light.coneDirection[0]);
-		glUniform1f(glGetUniformLocation(shaderID, "coneAngle"), light.coneAngle);
-	}
-	//Matrix Setup
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_FALSE, &cam.getView()[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "proj"), 1, GL_FALSE, &cam.getProj()[0][0]);
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "model"), 1, GL_FALSE, &model[0][0]);
-
-
-	if (mesh.tex)
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, mesh.tex);
-		glUniform1i(glGetUniformLocation(shaderID, "texture_primary"), 0);
-	}
-
-	if (mesh.norm)
-	{
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, mesh.norm);
-		glUniform1i(glGetUniformLocation(shaderID, "normal_map"), 1);
-	}
-	glDrawArrays(GL_TRIANGLES, 0, mesh.mesh_vertex_count);
-}
-
-void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh mesh)
+void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh &mesh)
 {
 	glDepthMask(GL_FALSE);
 	glUseProgram(shaderID);
@@ -245,13 +212,13 @@ void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh mesh)
 	glDepthMask(GL_TRUE);
 }
 
-void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh mesh, LightStruct light)
+void drawCubeMap(GLuint shaderID, EulerCamera cam, SingleMesh &mesh, LightStruct lightLocation)
 {
 	glDepthMask(GL_FALSE);
 	glUseProgram(shaderID);
 	glBindVertexArray(mesh.VAO[0]);
-	glUniform3fv(glGetUniformLocation(shaderID, "Ld"), 1, &light.Ld[0]);
-	glUniform3fv(glGetUniformLocation(shaderID, "La"), 1, &light.La[0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "Ld"), 1, &lightLocation.Ld[0]);
+	glUniform3fv(glGetUniformLocation(shaderID, "La"), 1, &lightLocation.La[0]);
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(shaderID, "cube_texture"), 0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, mesh.tex);

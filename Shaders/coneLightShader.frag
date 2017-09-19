@@ -8,17 +8,17 @@ in vec3 camPos;
 //************//
 //OBJECT COLOR//
 //************//
-vec3 Ks = vec3(1.0f, 1.0f, 1.0f); // specular reflectance
-vec3 Kd = vec3(238.0f/255.0f, 202.0f/255.0f, 109f/255.0f); // diffuse reflectance
-vec3 Ka = vec3(1.0f, 1.0f, 1.0f); // ambient reflectance
-float specular_exponent = 1.0f; //specular 'power'?
+uniform vec3 Ks; //= vec3(1.0f, 1.0f, 1.0f); // specular reflectance
+uniform vec3 Kd; //= vec3(238.0f/255.0f, 202.0f/255.0f, 109f/255.0f); // diffuse reflectance
+uniform vec3 Ka; //= vec3(1.0f, 1.0f, 1.0f); // ambient reflectance
+uniform float specular_exponent; //= 1.0f; //specular 'power'?
 
 //***********//
 //LIGHT COLOR//
 //***********//
-uniform vec3 Ls; //white specular color
-uniform vec3 Ld; // dull white diffuse light 
-uniform vec3 La;  // grey ambient color
+uniform vec3 Ls;
+uniform vec3 Ld;
+uniform vec3 La;
 uniform vec3 coneDirection;
 uniform float coneAngle;
 

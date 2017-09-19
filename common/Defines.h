@@ -35,6 +35,12 @@
 
 #define TEST_VERT				"../Shaders/testVertex.txt"
 #define TEST_FRAG				"../Shaders/testFragment.txt"
+
+#define SKY_VERT				"../Shaders/skyboxVertexShader.txt"
+#define SKY_FRAG				"../Shaders/skyboxFragmentShader.txt"
+
+#define REFLECTIVE_FRAG			"../Shaders/reflectiveFragmentShader.txt"
+#define FRESNEL_FRAG			"../Shaders/fresnelFragmentShader.txt"
 /*----------------------------------------------------------------------------
 						MESH AND TEXTURE VARIABLES
 ----------------------------------------------------------------------------*/
@@ -51,12 +57,14 @@
 #define CUBE_MESH				"../Meshes/cube.obj"
 
 #define BEAR_TEXTURE			"../Textures/bear.tga"
-#define BEAR_TEXTURE2			"../Textures/bear2.tga"
 #define REFLECT_TEXTURE			"../Textures/reflection.png"
 #define REFRACT_TEXTURE			"../Textures/refraction.png"
 #define NORMAL_TEXTURE			"../Textures/normalmapped.png"
 #define BRICK_TEXTURE			"../Textures/brickwall.jpg"
+
 #define BRICK_NORMAL			"../Textures/brickwall_normal.jpg"
+#define WOOD_NORMAL				"../Textures/woodnormal.jpg"
+#define STEEL_NORMAL			"../Textures/steelFloor_normal.jpg"
 /*--------------------------------------------------------------------------*/
 
 #endif

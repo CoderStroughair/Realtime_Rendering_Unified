@@ -74,6 +74,7 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)includes\;$(SolutionDir);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)libraries;$(LibraryPath)</LibraryPath>
+    <OutDir>$(MSBuildProjectDirectory)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -165,7 +166,6 @@
     <ClInclude Include="..\common\stb_image.h" />
     <ClInclude Include="..\common\teapot.h" />
     <ClInclude Include="..\common\text.h" />
-    <ClInclude Include="..\common\Texture.h" />
     <ClInclude Include="..\common\Utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -2,7 +2,7 @@
 #define SINGLEMESH_H
 
 #include <GL/glew.h>
-#include <common/Antons_maths_funcs.h>
+#include <GLM.h>
 #include <GL/freeglut.h>
 #include <iostream>
 #include <string>
@@ -45,8 +45,6 @@ public:
 	void init(const char* mesh_file, const char* tex_file, const char* normal_file);
 	void initCubeMap(GLfloat vertices[], int num_vertices, string texture);
 	void SingleMesh::loadCubeFace(GLuint textureID, GLenum side, const char* filename);
-	bool SingleMesh::update_mesh(mat4 orientation, vec3 position);
-	bool SingleMesh::scale_mesh(GLfloat scale);
 	GLuint VAO[20], tex, norm;
 	int mesh_vertex_count, mesh_indice_count;
 	bool UVmap = false;
@@ -60,10 +58,7 @@ public:
 	vector<GLfloat> initialnormals;
 	vector<GLfloat> initialtexCoords;
 
-
-	//The following elements are only used for indexed meshes
-
-	void convertMesh();
+	int mode = GL_TRIANGLES;
 };
 
 #endif

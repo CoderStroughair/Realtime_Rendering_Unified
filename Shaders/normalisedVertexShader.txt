@@ -6,7 +6,7 @@ layout(location = 2) in vec2 texture_coord;
 layout(location = 3) in vec4 vtangent;
 
 uniform mat4 model, view, proj;
-uniform vec3 light; //location not direction
+uniform vec3 light;
 out vec4 test_tan;
 
 out vec2 texture_coordinates;
@@ -23,7 +23,7 @@ void main()
 	/* a hacky way to get the camera position out of the view matrix instead of
 	using another uniform variable */
 	vec3 cam_pos_wor = (inverse (view) * vec4 (0.0, 0.0, 0.0, 1.0)).xyz;
-	vec3 light_dir_wor = light;
+	vec3 light_dir_wor = -light;
 	
 	/* work out bi-tangent as cross product of normal and tangent. also multiply
 		 by the determinant, which we stored in .w to correct handedness

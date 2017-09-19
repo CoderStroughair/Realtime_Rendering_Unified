@@ -43,6 +43,7 @@ public:
 	glm::vec3 getFront();
 	void setFront(glm::vec3 value, GLfloat y, GLfloat p);
 	glm::vec3 getUp();	
+	void setUp(glm::vec3 u);
 	glm::mat4 getView();
 	glm::mat4 getProj();
 	void jump(bool& jumping);

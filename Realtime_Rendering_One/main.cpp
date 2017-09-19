@@ -77,30 +77,39 @@ void display() {
 
 	// object properties
 	glm::mat4 model;
-	glm::vec3 light = glm::vec3(1.8*cos(rotateLight), 1.8*sin(rotateLight) + 1.0f, -5.0f);//light source location
 
-	model = glm::rotate(glm::mat4x4(), rotateY, glm::vec3(0.0, 1.0, 0.0));
-	drawObject(noTextureShaderID, cam, monkeyhead_mesh, model, false, light);
+	LightStruct lightContainer;
+	lightContainer.lightLocation = glm::vec3(1.8*cos(rotateLight), 1.8*sin(rotateLight) + 1.0f, -5.0f);
+	lightContainer.Ld = glm::vec3(0.8f, 0.8f, 0.8f);
 	
 	model = glm::translate(glm::mat4x4(), glm::vec3(-4.0f, -4.0f, 0.0f));
 	model = glm::rotate(model, rotateY, glm::vec3(0.0, 1.0, 0.0));
-	drawObject(variableShaderID, cam, monkeyhead_mesh, model, false, light);
+	drawObject(variableShaderID, cam, monkeyhead_mesh, model, false, lightContainer);
 
 	model = glm::translate(glm::mat4x4(), glm::vec3(4.0f, 3.0f, 0.0f));
 	model = glm::rotate(model, rotateY, glm::vec3(0.0, 1.0, 0.0));
-	drawObject(bearShaderID, cam, bear_mesh, model, false, light);
+	drawObject(bearShaderID, cam, bear_mesh, model, false, lightContainer);
 
 	model = glm::translate(glm::mat4x4(), glm::vec3(-4.0f, 3.0f, 0.0f));
 	model = glm::rotate(model, rotateY, glm::vec3(0.0, 1.0, 0.0));
-	drawObject(blackBearShaderID, cam, bear_mesh, model, false, light);
+	drawObject(blackBearShaderID, cam, bear_mesh, model, false, lightContainer);
 
+	lightContainer.Kd = BLUE;
 	model = glm::translate(glm::mat4x4(), glm::vec3(4.0f, -4.0f, 0.0f));
 	model = glm::rotate(model, rotateY, glm::vec3(0.0, 1.0, 0.0));
-	drawObject(coneShaderID, cam, bear_mesh, model, true, light);
+	drawObject(coneShaderID, cam, bear_mesh, model, true, lightContainer);
 
+	lightContainer.Kd = WHITE;
 	model = glm::translate(glm::mat4x4(), glm::vec3(6.0f, -8.0f, 1.8f));
 	model = glm::rotate(model, 90.0f, glm::vec3(0.0, 1.0, 0.0));
-	drawObject(coneShaderID, cam, wall, model, false, light);
+	drawObject(coneShaderID, cam, wall, model, false, lightContainer);
+
+	lightContainer.Ks = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightContainer.Kd = glm::vec3(238.0f / 255.0f, 202.0f / 255.0f, 109.0f / 255.0f);
+	lightContainer.Ka = glm::vec3(1.0f, 1.0f, 1.0f);
+	lightContainer.specular_exponent = 100.0f;
+	model = glm::rotate(glm::mat4x4(), rotateY, glm::vec3(0.0, 1.0, 0.0));
+	drawObject(noTextureShaderID, cam, monkeyhead_mesh, model, false, lightContainer);
 
 	draw_texts();
 	glutSwapBuffers();

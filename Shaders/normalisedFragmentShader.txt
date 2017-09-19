@@ -6,6 +6,8 @@ in vec3 view_dir_tan;
 in vec3 light_dir_tan;
 
 // the normal map texture
+uniform sampler2D texture_primary;
+
 uniform sampler2D normal_map;
 
 //************//
@@ -49,6 +51,21 @@ void main() {
 	vec3 Is = Ks * Ls * specular_factor * specular_exponent;
 
 	// phong light output
-	frag_colour.rgb = Is + Id + Ia;
+	frag_colour = vec4(Is + Id + Ia, 1.0);
 	frag_colour.a = 1.0;
+	frag_colour *= texture(texture_primary, texture_coordinates);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

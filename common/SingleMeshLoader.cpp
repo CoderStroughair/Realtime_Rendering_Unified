@@ -29,7 +29,6 @@ void SingleMesh::init(const char* mesh_file, const char* tex_file = NULL, const 
 		load_texture(normal_file, &norm);
 		//glUniform1i(norm, 1);
 	}
-
 }
 
 void SingleMesh::initCubeMap(GLfloat vertices[], int num_vertices, string texture)
@@ -175,7 +174,6 @@ bool SingleMesh::load_mesh(const char* file_name)
 				//cout << "[" << texcoords[i * 2] << "," << texcoords[i * 2 + 1] << "]" << endl;
 			}
 		}
-
 		if (mesh->HasTangentsAndBitangents()) {
 			//cout << "There are tangent vertexes for mesh " << name.substr(name.find_last_of('/') + 1, name.length()) << endl;
 			tangents = (GLfloat*)malloc(mesh_vertex_count * 4 * sizeof(GLfloat));
@@ -186,15 +184,15 @@ bool SingleMesh::load_mesh(const char* file_name)
 				const aiVector3D* normal = &(mesh->mNormals[i]);
 
 				// put the three vectors into my vec3 struct format for doing maths
-				vec3 t(tangent->x, tangent->y, tangent->z);
-				vec3 n(normal->x, normal->y, normal->z);
-				vec3 b(bitangent->x, bitangent->y, bitangent->z);
+				glm::vec3 t(tangent->x, tangent->y, tangent->z);
+				glm::vec3 n(normal->x, normal->y, normal->z);
+				glm::vec3 b(bitangent->x, bitangent->y, bitangent->z);
 				// orthogonalise and normalise the tangent so we can use it in something
 				// approximating a T,N,B inverse matrix
-				vec3 t_i = normalise(t - n * dot(n, t));
+				glm::vec3 t_i = glm::normalize(t - n * glm::dot(n, t));
 
 				// get determinant of T,B,N 3x3 matrix by dot*cross method
-				float det = (dot(cross(n, t), b));
+				float det = (glm::dot(glm::cross(n, t), b));
 				if (det < 0.0f) {
 					det = -1.0f;
 				}
@@ -203,9 +201,9 @@ bool SingleMesh::load_mesh(const char* file_name)
 				}
 
 				// push back 4d vector for inverse tangent with determinant
-				tangents[i * 4] = t_i.v[0];
-				tangents[i * 4 + 1] = t_i.v[1];
-				tangents[i * 4 + 2] = t_i.v[2];
+				tangents[i * 4] = t_i.x;
+				tangents[i * 4 + 1] = t_i.y;
+				tangents[i * 4 + 2] = t_i.z;
 				tangents[i * 4 + 3] = det;
 			}
 		}
@@ -259,111 +257,6 @@ bool SingleMesh::load_mesh(const char* file_name)
 	return true;
 }
 
-bool SingleMesh::update_mesh(mat4 orientation, vec3 position)
-{
-	for (int i = 0; i < mesh_vertex_count; i++)
-	{
-		vec3 vertice = vec3(initialpoints[i * 3], initialpoints[i * 3 + 1], initialpoints[i * 3 + 2]);
-		vertice = multiply(orientation, vertice) + position;
-		newpoints[i * 3] = vertice.v[0];
-		newpoints[i * 3 + 1] = vertice.v[1];
-		newpoints[i * 3 + 2] = vertice.v[2];
-
-		vertice = vec3(initialnormals[i * 3], initialnormals[i * 3 + 1], initialnormals[i * 3 + 2]);
-		vertice = multiply(orientation, vertice) + position;
-		newnormals[i * 3] = vertice.v[0];
-		newnormals[i * 3 + 1] = vertice.v[1];
-		newnormals[i * 3 + 2] = vertice.v[2];
-	}
-
-
-
-	glBindVertexArray(VAO[0]);
-	/* copy mesh data into VBOs */
-	if (!converted)
-	{
-		GLuint vbo;
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, mesh_vertex_count * 3 * sizeof(GLfloat), newpoints.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(0);
-
-		GLuint vbo2;
-		glGenBuffers(1, &vbo2);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-		glBufferData(GL_ARRAY_BUFFER, 3 * mesh_vertex_count * sizeof(GLfloat), newnormals.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(1);
-	}
-
-	else
-
-	{
-		GLuint vbo, ebo;
-		glGenBuffers(1, &vbo);
-		glGenBuffers(1, &ebo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, mesh_vertex_count * 3 * sizeof(GLfloat), newpoints.data(), GL_STATIC_DRAW);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_indice_count * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-		glEnableVertexAttribArray(0);
-
-		//GLuint vbo1, ebo1;
-		//glGenBuffers(1, &vbo1);
-		//glGenBuffers(1, &ebo1);
-		//glBindBuffer(GL_ARRAY_BUFFER, vbo1);
-		//glBufferData(GL_ARRAY_BUFFER, mesh_vertex_count * 3 * sizeof(GLfloat), newnormals.data(), GL_STATIC_DRAW);
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo1);
-		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_indice_count * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-		//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-		//glEnableVertexAttribArray(1);
-	}
-	return true;
-}
-
-bool SingleMesh::scale_mesh(GLfloat scale)
-{
-	for (int i = 0; i < mesh_vertex_count; i++)
-	{
-		vec3 vertice = vec3(initialpoints[i * 3], initialpoints[i * 3 + 1], initialpoints[i * 3 + 2]);
-		vertice *= scale;
-		newpoints[i * 3] = vertice.v[0];
-		newpoints[i * 3 + 1] = vertice.v[1];
-		newpoints[i * 3 + 2] = vertice.v[2];
-
-		vertice = vec3(initialnormals[i * 3], initialnormals[i * 3 + 1], initialnormals[i * 3 + 2]);
-		vertice *= scale;
-		vertice = normalise(vertice);
-		newnormals[i * 3] = vertice.v[0];
-		newnormals[i * 3 + 1] = vertice.v[1];
-		newnormals[i * 3 + 2] = vertice.v[2];
-	}
-
-
-
-	glBindVertexArray(VAO[0]);
-	/* copy mesh data into VBOs */
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, mesh_vertex_count * 3 * sizeof(GLfloat), newpoints.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(0);
-
-	GLuint vbo2;
-	glGenBuffers(1, &vbo2);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-	glBufferData(GL_ARRAY_BUFFER, 3 * mesh_vertex_count * sizeof(GLfloat), newnormals.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(1);
-
-	return true;
-}
-
 bool SingleMesh::load_texture(const char* file_name, GLuint* tex)
 {
 	int x, y, n;
@@ -412,117 +305,4 @@ bool SingleMesh::load_texture(const char* file_name, GLuint* tex)
 	// set the maximum!
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_aniso);
 	return true;
-}
-
-
-//The following code is only used for indexed meshes
-
-void SingleMesh::convertMesh()		//removes the extra vertices from the mesh, leaving just the singular values;
-{
-	vector<vec3> vertexOut;
-	vector<vec3> normalOut;
-	vector<vec2> texOut;
-
-	int curr_index = 0;
-
-	for (int i = 0; i < mesh_vertex_count; i++)
-	{
-		vec3 vertice = vec3(initialpoints[i * 3], initialpoints[i * 3 + 1], initialpoints[i * 3 + 2]);
-		vec3 normal = vec3(initialnormals[i * 3], initialnormals[i * 3 + 1], initialnormals[i * 3 + 2]);
-		vec2 texCoords = vec2();
-		if(UVmap)
-			texCoords = vec2(initialtexCoords[i * 2], initialtexCoords[i * 2 + 1]);
-		bool duplicate = false;
-		int index = -1;
-		for (int j = 0; j < vertexOut.size(); j++)
-		{
-			if (vertexOut[j] == vertice)
-			{
-				duplicate = true;
-				indices.push_back(j);
-				break;
-			}
-		}
-		if (!duplicate)
-		{
-			vertexOut.push_back(vertice);
-			normalOut.push_back(normal);
-			if (UVmap)
-			{
-				texOut.push_back(texCoords);
-			}
-			indices.push_back(vertexOut.size() - 1);
-		}
-	}
-
-	initialpoints = vector<GLfloat>();
-	initialnormals = vector<GLfloat>();
-	initialtexCoords = vector<GLfloat>();
-
-	vector<GLfloat> v;
-	vector<GLfloat> n;
-	vector<GLfloat> t;
-
-	for (int i = 0; i < vertexOut.size(); i++)
-	{
-		initialpoints.push_back(vertexOut[i].v[0]);
-		initialpoints.push_back(vertexOut[i].v[1]);
-		initialpoints.push_back(vertexOut[i].v[2]);
-
-		initialnormals.push_back(normalOut[i].v[0]);
-		initialnormals.push_back(normalOut[i].v[1]);
-		initialnormals.push_back(normalOut[i].v[2]);
-
-		if(UVmap)
-		{
-			initialtexCoords.push_back(texOut[i].v[0]);
-			initialtexCoords.push_back(texOut[i].v[1]);
-		}
-
-	}
-	mesh_indice_count = mesh_vertex_count;
-	mesh_vertex_count = vertexOut.size();
-	glBindVertexArray(VAO[0]);
-
-
-	GLuint vbo, ebo;
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, mesh_vertex_count * 3 * sizeof(GLfloat), initialpoints.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_indice_count * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-	glEnableVertexAttribArray(0);
-
-	GLuint vbo1, ebo1;
-	glGenBuffers(1, &vbo1);
-	glGenBuffers(1, &ebo1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo1);
-	glBufferData(GL_ARRAY_BUFFER, mesh_vertex_count * 3 * sizeof(GLfloat), initialnormals.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo1);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh_indice_count * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), NULL);
-	glEnableVertexAttribArray(1);
-
-	if(UVmap)
-	{
-		GLuint vbo2, ebo2;
-		glGenBuffers(1, &vbo2);
-		glGenBuffers(1, &ebo2);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-		glBufferData(GL_ARRAY_BUFFER, mesh_vertex_count * 3 * sizeof(GLfloat), initialtexCoords.data(), GL_STATIC_DRAW);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo2);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLfloat), indices.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-		glEnableVertexAttribArray(2);
-	}
-	glBindVertexArray(0);
-	converted = true;
-
-	newpoints = initialpoints;
-	newnormals = initialnormals;
-
 }

@@ -62,6 +62,12 @@ void EulerCamera::setFront(glm::vec3 value, GLfloat y, GLfloat p) {
 
 glm::vec3 EulerCamera::getUp() { return up; }
 
+void EulerCamera::setUp(glm::vec3 u)
+{
+	u = glm::normalize(u);
+	up = u;
+}
+
 glm::mat4 EulerCamera::getView()
 {
 	return glm::lookAt(position, position + front, up);
@@ -87,34 +93,6 @@ void EulerCamera::jump(bool& jumping) {
 	else
 		return;
 }
-
-//void EulerCamera::orbitAround(glm::vec3 point, GLfloat pi, GLfloat ya)
-//{
-//	rotatePitch += pi;
-//	rotateYaw += ya;
-//
-//	if (rotatePitch > 89)
-//		rotatePitch = 89;
-//	if (rotatePitch < -89)
-//		rotatePitch = -89;
-//	if (rotateYaw > 360)
-//		rotateYaw = 0;
-//	else if (rotateYaw < 0)
-//		rotateYaw = 360;
-//
-//	glm::vec3 direction = point - position;
-//	float displacement = glm::length(direction);
-//
-//	direction.x = cos(glm::radians(rotateYaw)) * cos(glm::radians(rotatePitch));
-//	direction.y = sin(glm::radians(rotatePitch));
-//	direction.z = sin(glm::radians(rotateYaw)) * cos(glm::radians(rotatePitch));
-//
-//	direction = glm::normalize(direction);
-//	direction *= displacement;
-//	position = point + direction;
-//
-//	front = glm::normalize(point - position);
-//}
 
 void EulerCamera::orbitAround(glm::vec3 point, GLfloat pi, GLfloat ya)
 {

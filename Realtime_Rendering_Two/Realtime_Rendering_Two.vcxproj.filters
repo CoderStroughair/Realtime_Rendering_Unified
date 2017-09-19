@@ -65,9 +65,6 @@
     <ClInclude Include="..\common\text.h">
       <Filter>common\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\Texture.h">
-      <Filter>common\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\Utilities.h">
       <Filter>common\Header Files</Filter>
     </ClInclude>
