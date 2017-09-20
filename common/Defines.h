@@ -41,6 +41,7 @@
 
 #define REFLECTIVE_FRAG			"../Shaders/reflectiveFragmentShader.txt"
 #define FRESNEL_FRAG			"../Shaders/fresnelFragmentShader.txt"
+#define REFLECTIVE_GLOBAL_FRAG	"../Shaders/reflectiveGlobalShader.frag"
 /*----------------------------------------------------------------------------
 						MESH AND TEXTURE VARIABLES
 ----------------------------------------------------------------------------*/

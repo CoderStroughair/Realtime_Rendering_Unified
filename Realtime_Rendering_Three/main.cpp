@@ -7,6 +7,7 @@
 #include <common/EulerCamera.h>
 #include <common/Defines.h>
 #include <GLM.h>
+#include "glm/ext.hpp"
 #include <common/text.h>
 #include <common/Framebuffer.h>
 
@@ -74,12 +75,8 @@ Shader shaderFactory;
 /*----------------------------------------------------------------------------
 							CAMERA VARIABLES
 ----------------------------------------------------------------------------*/
-GLfloat playerHeight = 0.0f;
-GLfloat lastx = width / 2.0f;
-GLfloat lasty = height / 2.0f;
 float fontSize = 25.0f;
-glm::vec3 startingPos = { 0.0f, playerHeight, -20.0f };
-glm::vec3 startingFront = { 0.0f, playerHeight, 1.0f };
+glm::vec3 startingPos = { 0.0f, 0.0f, -20.0f };
 GLfloat pitCam = 0, yawCam = 0, rolCam = 0, frontCam = 0, sideCam = 0, speed = 1;
 float rotateY = 50.0f, rotateLight = 0.0f;
 
@@ -150,7 +147,7 @@ void init()
 	cubeMapShaderID = shaderFactory.CompileShader(SKY_VERT, SKY_FRAG);
 	textureShaderID = shaderFactory.CompileShader(TEXTURE_VERT, TEXTURE_FRAG);
 	normalisedShaderID = shaderFactory.CompileShader(NORMAL_VERT, NORMAL_FRAG);
-	reflectiveShaderID = shaderFactory.CompileShader(NOTEXTURE_VERT, REFLECTIVE_FRAG);
+	reflectiveShaderID = shaderFactory.CompileShader(TEXTURE_VERT, REFLECTIVE_FRAG);
 	multiTextureShaderID = shaderFactory.CompileShader(TEXTURE_VERT, TEXTURE_FRAG);
 	mirrorShaderID = shaderFactory.CompileShader(MIRROR_VERT, MIRROR_FRAG);
 
@@ -194,41 +191,6 @@ void display()
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemap[0], 0);
 
 	}
-	/*for (int i = 0; i < 6; i++)
-	{
-		vec3 position = mirrorCam.getPosition();
-		view = look_at(position, position + normalise(viewsX[i]), vec3(0.0, -0.5, -0.5));
-		if (i == 2)
-			view = look_at(position, position + normalise(viewsX[4]), vec3(0.0, -0.5, -0.5));
-		else if (i == 3)
-			view = look_at(position, position + normalise(viewsX[i]), viewsX[5]);
-		drawLoop(mirrorCam, fb[1][i].framebuffer);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemap[1], 0);
-	}
-	for (int i = 0; i < 6; i++)
-	{
-		vec3 position = mirrorCam.getPosition();
-		view = look_at(position, position + normalise(viewsY[i]), vec3(0.0, -1, 0.0));
-		if (i == 2)
-			view = look_at(position, position + normalise(viewsY[i]), viewsY[5]);
-		else if (i == 3)
-			view = look_at(position, position + normalise(viewsY[i]), viewsY[5]);
-		drawLoop(mirrorCam, fb[2][i].framebuffer);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemap[2], 0);
-	}
-	for (int i = 0; i < 6; i++)
-	{
-		vec3 position = mirrorCam.getPosition();
-		view = look_at(position, position + normalise(viewsZ[i]), vec3(-0.5, -0.5, 0.0));
-		if (i == 2)
-			view = look_at(position, position + normalise(viewsZ[i]), viewsZ[3]);
-		else if (i == 3)
-			view = look_at(position, position + normalise(viewsZ[i]), viewsZ[5]);
-		drawLoop(mirrorCam, fb[3][i].framebuffer);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemap[3], 0);
-	}*/
-
-
 	drawLoop(cam, 0);
 
 
@@ -300,11 +262,7 @@ void keypress(unsigned char key, int x, int y)
 		sideCam = 1;
 	if (key == ' ')
 	{
-		simple = !simple;
-		if (simple)
-			update_text(textID, "Simplified Version - This only shows a single cubemap");
-		else
-			update_text(textID, "Complex Version - This shows the use of all four cubemaps");
+
 	}
 	if (key == 'm')
 	{
@@ -407,9 +365,6 @@ int main(int argc, char** argv) {
 	}
 
 	init();
-	textID = add_text(
-		"Simplified Version - This only shows a single cubemap",
-		-0.9, 0.8, fontSize, 1.0f, 1.0f, 1.0f, 1.0f);
 	for (int i = 0; i < sizeof(gemLocation) / sizeof(*gemLocation); i++)
 	{
 		float x = rand() % 50 - 25;
@@ -495,30 +450,14 @@ void drawReflectiveObject(EulerCamera &cam, SingleMesh &mesh, glm::mat4 model)
 {
 	glUseProgram(reflectiveShaderID);
 	glBindVertexArray(mesh.VAO[0]);
-	glUniform4fv(glGetUniformLocation(reflectiveShaderID, "camPos"), 1, &cam.getPosition()[0]);
+	glUniform3fv(glGetUniformLocation(reflectiveShaderID, "camPos"), 1, &cam.getPosition()[0]);
 	glUniformMatrix4fv(glGetUniformLocation(reflectiveShaderID, "view"), 1, GL_FALSE, &cam.getView()[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(reflectiveShaderID, "proj"), 1, GL_FALSE, &cam.getProj()[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(reflectiveShaderID, "model"), 1, GL_FALSE, &model[0][0]);
-	glUniform1i(glGetUniformLocation(reflectiveShaderID, "simple"), simple);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap[0]);
 	glUniform1ui(glGetUniformLocation(reflectiveShaderID, "cube_texture"), 0);
-	//glUniform1i(0, 0);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap[1]);
-	glUniform1ui(glGetUniformLocation(reflectiveShaderID, "cube_textureX"), 1);
-	//glUniform1i(1, 1);
-
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap[2]);
-	glUniform1i(glGetUniformLocation(reflectiveShaderID, "cube_textureY"), 2);
-
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap[3]);
-	glUniform1i(glGetUniformLocation(reflectiveShaderID, "cube_textureZ"), 3);
-
 
 	glDrawArrays(mesh.mode, 0, mesh.mesh_vertex_count);
 }
